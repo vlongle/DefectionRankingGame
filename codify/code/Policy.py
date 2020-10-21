@@ -2,9 +2,11 @@ from itertools import product
 from code.CoalitionStructure import CoalitionStructure
 from code.State import State
 import numpy as np
+#from collections import defaultdict
 
 def eval_policy_state(game, policy_state, policies=None):
     '''
+    Bug here! Payoff here should include everyone!!
     Let k be the number of agents in the coalitions!
     We have |A|^k=2^k possible outcomes. Each outcome leads
     to another game state.
@@ -24,9 +26,10 @@ def eval_policy_state(game, policy_state, policies=None):
     #print('\nConstructing Game for', policy_state, end='\n')
     c = np.array(policy_state.coalition_considered)
     k = len(c)
-    #payout = np.zeros(shape=[k] + [2] * k)  # shape=(k,2,...,2)
+    n = len(game.N)
+    payout = np.zeros(shape=[n] + [2] * k)  # shape=(n,2,...,2)
     #payout = np.zeros(shape= [2] * k)  # shape=(2,...,2)
-    payout = {}
+    #payout = defaultdict(list)
     # 1 == stay, 0 == leave
     possible_outcomes = product(range(2), repeat=k)
 
@@ -51,9 +54,10 @@ def eval_policy_state(game, policy_state, policies=None):
                 action = outcome[i]
                 p *= policies[agent][policy_state.state_num, action]
 
-        valuations = p * game.valuations[new_state]
-        # print('new_state:', new_state)
+        valuations = game.valuations[new_state]
         #print('valuation:', valuations, 'for outcome', outcome)
-        for i, agent in enumerate(c):
-            payout[agent][tuple(outcome)] = valuations[agent.name]
+        for i, agent in enumerate(game.N):
+            payout[tuple([i] + list(outcome))] = p * valuations[agent.name]
+            #if agent.name == 'A':
+            #    print('A payoff:', payout[i])
     return payout

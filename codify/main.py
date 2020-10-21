@@ -5,6 +5,7 @@ from networkx.drawing.nx_pydot import graphviz_layout
 from pprint import pprint
 import numpy as np
 from itertools import product
+from collections import defaultdict
 
 
 
@@ -13,17 +14,18 @@ A = Player.Player('A', 3)
 B = Player.Player('B', 2)
 C = Player.Player('C', 1)
 N = set([A, B, C])
+#N = set([A, B])
 
 
 ## Game defn
 CS0 = CoalitionStructure.CoalitionStructure(CS=[], Z=[])
 G0 = State.State(N, CS0, t=0)
 graph = nx.DiGraph()
-T = 2
+T = 1
 
 
 ## build Game
-game = Game.Game(G0, graph, T)
+game = Game.Game(G0, N, graph, T)
 game.build_graph()
 
 
@@ -68,15 +70,23 @@ def softmax(raw_policy, alpha=1):
 
 
 def eval_states(game, policies):
-    print('eval_states!!')
     T = game.T
     for t in range(T, -1,-1):
-        print('t:', t)
         for state in game.nodes[t]:
             if t == T:
                 game.valuations[state] = state.evaluate_leaf()
+                #print('>> leaf', state, '\n \t val:', game.valuations[state])
                 continue
             # bottom down eval
+            state_value = defaultdict(float) # dictionary
+            denom = len(state.policyStates)
+            for ps in state.policyStates:
+                policy_state_payoff = Policy.eval_policy_state(game, ps, policies)
+                for i, agent in enumerate(game.N):
+                    state_value[agent] += (1/denom) * np.sum(policy_state_payoff[i])
+            game.valuations[state] = state_value
+            #print('++ state', state, '\n \t val:', game.valuations[state], 'A VAL:', game.valuations[state][A])
+            #print('poli_states:', state.policyStates)
 
 def eval_state(game, policy_state, policies):
     # should only called if the resulting states are already defined
@@ -104,17 +114,17 @@ def optimize_agent(agent, policies, game):
         if agent not in C:
             continue
         #print('agent_id:', agent_id)
-        my_policy_in_ps = policies[agent][policy_state.state_num]
+        my_policy_in_ps = np.copy(policies[agent][policy_state.state_num])
         policies[agent][policy_state.state_num] = [1, 1]
 
         #possible_outcomes = product(range(2), repeat=len(C))
 
+        agent_id = game.N.index(agent)
         action_values = [0, 0] # [leave, not_leave] i.e. (0, 1)
 
-        payout = Policy.eval_policy_state(game, policy_state, policies)[agent]
+        payout = Policy.eval_policy_state(game, policy_state, policies)[agent_id]
         for action in [0, 1]: # leave or not leave
-            np.take(payout, [action], axis=agent_id)
-            pass
+            action_values[action] = np.sum(np.take(payout, [action], axis=C.index(agent)))
 
         #for outcome in possible_outcomes:
         #    my_action = outcome[agent_id]
@@ -136,7 +146,7 @@ def optimize_agent(agent, policies, game):
             #print(probs != policies[agent][policy_state.state_num])
             #print(probs[0], policies[agent][policy_state.state_num][0], probs[0] != policies[agent][policy_state.state_num][0])
             print('=== changing', agent, 'in state', policy_state, 'to:',
-                  probs, 'from action_values:', action_values)
+                  probs, 'from action_values:', action_values, 'from old:', my_policy_in_ps)
                   #, 'from old policies:', policies[agent][policy_state.state_num])
         policies[agent][policy_state.state_num] = probs
         # change exactly proportional to action_values. I mean I could

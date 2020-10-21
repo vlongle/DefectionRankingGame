@@ -13,6 +13,7 @@ class State:
         self.t = t
         self.name = 'G(' + 'F=' + str(self.F) + ',' + str(self.CS) + ',t=' + str(self.t) + ')'
         self.value = None
+        self.policyStates = []
 
     def __hash__(self):
         return hash(self.name)

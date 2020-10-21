@@ -6,8 +6,9 @@ from code.utils import *
 
 
 class Game:
-    def __init__(self, G0, graph, T):
+    def __init__(self, G0, N, graph, T):
         self.G0 = G0  # initial game state!
+        self.N = list(N)
         self.graph = graph
         self.T = T  # termination time
         self.nodes = defaultdict(set)
@@ -40,3 +41,4 @@ class Game:
                 continue
             policy_state = PolicyState(state, C, len(self.policyStates))
             self.policyStates.append(policy_state)
+            state.policyStates.append(policy_state)
