@@ -6,9 +6,10 @@ from pprint import pprint
 import numpy as np
 from itertools import product
 from collections import defaultdict
+import time
 
 
-
+start = time.time()
 ## Players
 A = Player.Player('A', 3)
 B = Player.Player('B', 2)
@@ -18,15 +19,20 @@ N = set([A, B, C])
 
 
 ## Game defn
-CS0 = CoalitionStructure.CoalitionStructure(CS=[], Z=[])
-G0 = State.State(N, CS0, t=0)
-graph = nx.DiGraph()
-T = 1
+def init_game(N, T):
+    CS0 = CoalitionStructure.CoalitionStructure(CS=[], Z=[])
+    G0 = State.State(N, CS0, t=0)
+    graph = nx.DiGraph()
 
+    ## build Game
+    game = Game.Game(G0, N, graph, T)
+    game.build_graph()
 
-## build Game
-game = Game.Game(G0, N, graph, T)
-game.build_graph()
+    policies = {} # key = player, value = policy
+    # policy = np array
+    for agent in N:
+        policies[agent] = 0.5 * np.ones(shape=(len(game.policyStates), 2))
+    return game, policies
 
 
 ## Graph!
@@ -36,8 +42,8 @@ game.build_graph()
 #plt.show()
 
 ## list policy states!
-pprint(game.policyStates)
-print()
+#pprint(game.policyStates)
+#print()
 # evaluate the leaf nodes!
 #for state in game.nodes[T]:
 #    game.valuations[state] = state.evaluate()
@@ -45,10 +51,6 @@ print()
 #Policy.constructNashGame(game, policy_state)
 
 
-policies = {} # key = player, value = policy
-# policy = np array
-for agent in N:
-    policies[agent] = 0.5 * np.ones(shape=(len(game.policyStates), 2))
 
 n_samples = 100
 
@@ -83,10 +85,15 @@ def eval_states(game, policies):
             for ps in state.policyStates:
                 policy_state_payoff = Policy.eval_policy_state(game, ps, policies)
                 for i, agent in enumerate(game.N):
-                    state_value[agent] += (1/denom) * np.sum(policy_state_payoff[i])
+                    state_value[agent.name] += (1/denom) * np.sum(policy_state_payoff[i])
             game.valuations[state] = state_value
-            #print('++ state', state, '\n \t val:', game.valuations[state], 'A VAL:', game.valuations[state][A])
+            #print('++ state', state, '\n \t val:', game.valuations[state], 'B VAL:', game.valuations[state]['B'])
             #print('poli_states:', state.policyStates)
+
+            #if state == G0:
+            #    print('G0!')
+            #    for ps in state.policyStates:
+            #        print('ps:', ps, 'val:', policy_state_payoff)
 
 def eval_state(game, policy_state, policies):
     # should only called if the resulting states are already defined
@@ -141,21 +148,46 @@ def optimize_agent(agent, policies, game):
         # change policy now!
 
         probs = softmax(action_values, 3)
-        eps = 0.05
-        if (abs(probs - my_policy_in_ps) > eps).any() :
+        #eps = 0.05
+        #if (abs(probs - my_policy_in_ps) > eps).any() :
             #print(probs != policies[agent][policy_state.state_num])
             #print(probs[0], policies[agent][policy_state.state_num][0], probs[0] != policies[agent][policy_state.state_num][0])
-            print('=== changing', agent, 'in state', policy_state, 'to:',
-                  probs, 'from action_values:', action_values, 'from old:', my_policy_in_ps)
+            #print('=== changing', agent, 'in state', policy_state, 'to:',
+            #      probs, 'from action_values:', action_values, 'from old:', my_policy_in_ps)
                   #, 'from old policies:', policies[agent][policy_state.state_num])
         policies[agent][policy_state.state_num] = probs
         # change exactly proportional to action_values. I mean I could
         # have take the max but whatever...
 
-print('\n\n >>> Optimizing agent')
-for i in range(n_samples):
-    eval_states(game, policies)
-    for agent in N:
-        optimize_agent(agent, policies, game)
+delta_ranks = {agent.name:[] for agent in N} # as a function of T
 
+T_range = 3
+
+
+for T in range(1, T_range):
+    print('T:', T)
+    game, policies = init_game(N, T=T)
+    G0 = game.G0
+    print('\n\n >>> Optimizing agent')
+    for i in range(n_samples):
+        eval_states(game, policies)
+        for agent in game.N:
+            optimize_agent(agent, policies, game)
+
+    # store result!
+    dynamic = game.valuations[G0]
+    for agent in game.N:
+        delta_ranks[agent.name].append(dynamic[agent.name])
+
+end = time.time()
+print('take:', end-start)
 #optimize_agent(C, policies, game)
+print(game.valuations[G0])
+for agent_name, delta_r in delta_ranks.items():
+    plt.plot(delta_r, label=agent_name)
+
+plt.legend()
+plt.show()
+
+
+

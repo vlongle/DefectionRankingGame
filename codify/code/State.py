@@ -19,7 +19,10 @@ class State:
         return hash(self.name)
 
     def __eq__(self, other):
-        return self.name == self.name
+        if not isinstance(other, State):
+            raise Exception('Cannot compare!')
+            # don't attempt to compare against unrelated types
+        return self.name == other.name
 
     def __repr__(self):
         return self.name

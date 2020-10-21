@@ -57,7 +57,10 @@ def eval_policy_state(game, policy_state, policies=None):
         valuations = game.valuations[new_state]
         #print('valuation:', valuations, 'for outcome', outcome)
         for i, agent in enumerate(game.N):
-            payout[tuple([i] + list(outcome))] = p * valuations[agent.name]
+            #print('doing something?')
+            #print('p:', p, 'val:', valuations[agent.name], p * valuations[agent.name])
+            payout[tuple([i] + list(outcome))] = p * valuations[agent.name] # bug here!!
+            #payout[tuple([i] + list(outcome))] = p * valuations[agent] # bug here!!
             #if agent.name == 'A':
             #    print('A payoff:', payout[i])
     return payout
