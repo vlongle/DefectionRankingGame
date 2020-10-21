@@ -1,9 +1,10 @@
 from collections import defaultdict
-
 from code.PolicyState import PolicyState
-
 from code.utils import *
-
+from code.CoalitionStructure import CoalitionStructure
+from code.State import State
+import networkx as nx
+import numpy as np
 
 class Game:
     def __init__(self, G0, N, graph, T):
@@ -42,3 +43,21 @@ class Game:
             policy_state = PolicyState(state, C, len(self.policyStates))
             self.policyStates.append(policy_state)
             state.policyStates.append(policy_state)
+
+
+
+## Game defn
+def init_game(N, T):
+    CS0 = CoalitionStructure(CS=[], Z=[])
+    G0 = State(N, CS0, t=0)
+    graph = nx.DiGraph()
+
+    ## build Game
+    game = Game(G0, N, graph, T)
+    game.build_graph()
+
+    policies = {} # key = player, value = policy
+    # policy = np array
+    for agent in game.N:
+        policies[agent] = 0.5 * np.ones(shape=(len(game.policyStates), 2))
+    return game, policies

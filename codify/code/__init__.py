@@ -1,1 +1,2 @@
-__all__ = ["utils", "Game", "State", "Player", "PolicyState", "CoalitionStructure", "Policy"]
+__all__ = ["utils", "Game", "State", "Player", "PolicyState", "CoalitionStructure", "Policy",
+           "AlternatingPolicyOpt"]

@@ -1,17 +1,18 @@
 from code.CoalitionStructure import CoalitionStructure
 from code.utils import *
 
-
 def v(s):
     # valuation of a coalition
     return 5 * int(len(s) >= 2)
+
+
 
 class State:
     def __init__(self, F, CS, t):
         self.F = set(F)  # FREE is a set
         self.CS = CS  # coalition structure
         self.t = t
-        self.name = 'G(' + 'F=' + str(self.F) + ',' + str(self.CS) + ',t=' + str(self.t) + ')'
+        self.name = 'G(' + 'F=' + str(sorted(list(self.F))) + ',' + str(self.CS) + ',t=' + str(self.t) + ')'
         self.value = None
         self.policyStates = []
 
