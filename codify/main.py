@@ -1,56 +1,56 @@
 from code import *
 import networkx as nx
-import matplotlib.pyplot as plt
-from networkx.drawing.nx_pydot import graphviz_layout
 from pprint import pprint
 import numpy as np
 from itertools import product
 from collections import defaultdict
 import time
 from functools import partial
-
+import multiprocessing
+import matplotlib.pyplot as plt
 
 plt.style.use('fivethirtyeight')
 
 
+def plot_progress(N, result, put_label=False):
+    for i, agent_name in enumerate(sorted([agent.name for agent in N])):
+        plt.plot(result[:, i], '-^', label=agent_name)
+
+        # https://queirozf.com/entries/add-labels-and-text-to-matplotlib-plots-annotation-examples
+        if put_label:
+            for x, y in zip(len(result[:, i]), result[:, i]):
+                label = "{:.2f}".format(y)
+                plt.annotate(label,  # this is the text
+                             (x, y),  # this is the point to label
+                             textcoords="offset points",  # how to position the text
+                             xytext=(0, 10),  # distance from text to points (x,y)
+                             ha='center')  # horizontal alignment can be left, right or center
+    plt.legend()
+    plt.ylabel('Delta ranking')
+    #plt.xlabel('Game depth (T)')
+    plt.xlabel('number of runs')
+    plt.title('Alternating Optimization Trajectories')
+    plt.show()
 
 
 
-#N = set([A, B])
-
-
-
-## Graph!
-#plt.rcParams['figure.figsize'] = 30, 10
-#pos =graphviz_layout(game.graph, prog='dot')
-#nx.draw(game.graph, pos,alpha=0.5, node_size=50, arrowsize=5, arrows=True)
-#plt.show()
-
-## list policy states!
-#pprint(game.policyStates)
-#print()
-# evaluate the leaf nodes!
-#for state in game.nodes[T]:
-#    game.valuations[state] = state.evaluate()
-
-#Policy.constructNashGame(game, policy_state)
-
-
-import multiprocessing
-
-
+def print_policies(policies, game):
+    for PS in game.policyStates:
+        print(PS)
+        for agent in game.N:
+            if agent not in PS.coalition_considered:
+                continue
+            print(agent, policies[agent][PS.state_num])
 
 if __name__ == '__main__':
-
-
-
     ## Players
     A = Player.Player('A', 3)
     B = Player.Player('B', 2)
     C = Player.Player('C', 1)
-    D = Player.Player('C', -1)
-    E = Player.Player('C', 0)
-    N = set([A, B, C, D, E])
+    D = Player.Player('D', -1)
+    E = Player.Player('E', 0)
+    #N = set([A, B, C, D, E])
+    N = set([A, B, C])
 
 
 
@@ -74,41 +74,30 @@ if __name__ == '__main__':
     #result = np.array(result)
 
 
-    n_samples = 100
-    T = 5
+    n_samples = 10
+    T = 2
     game, policies = Game.init_game(N, T)
+
+    print_policies(policies, game)
+    #game.draw()
+
+    #Policy.eval_states(game, policies)
+    #print(game.valuations[game.G0])
+
+
+    #for t in range(T+1):
+    #    print(t, len(game.nodes[t]))
+    #    pprint(game.nodes[t])
+
     result = AlternatingPolicyOpt.alternating_opt(game, policies, n_samples)
     result = np.array(result)
-    #for T in range(5, 8):
-    #    alternating_opt(T)
-
+    print("result:", result)
+    print("\n\n==== OPT POLICIES! ===")
+    print_policies(policies, game)
+    #plot_progress(N, result)
     end = time.time()
     print('take:', end-start)
-    for i, agent_name in enumerate(sorted([agent.name for agent in N])):
-        print(agent_name)
-        plt.plot(result[:, i], '-^', label=agent_name)
 
-        # https://queirozf.com/entries/add-labels-and-text-to-matplotlib-plots-annotation-examples
-        #for x, y in zip( range(T_max-T_min+1), result[:, i]):
-        #    label = "{:.2f}".format(y)
-        #    plt.annotate(label,  # this is the text
-        #                 (x, y),  # this is the point to label
-        #                 textcoords="offset points",  # how to position the text
-       #                 xytext=(0, 10),  # distance from text to points (x,y)
-       #                 ha='center')  # horizontal alignment can be left, right or center
-    plt.legend()
-    plt.ylabel('Delta ranking')
-    plt.xlabel('Game depth (T)')
-    plt.title('Alternating Optimization Trajectories')
-    plt.show()
-
-#optimize_agent(C, policies, game)
-#print(game.valuations[G0])
-#for agent_name, delta_r in delta_ranks.items():
-#    plt.plot(delta_r, label=agent_name)
-#
-#plt.legend()
-#plt.show()
 
 
 

@@ -3,8 +3,11 @@ from code.PolicyState import PolicyState
 from code.utils import *
 from code.CoalitionStructure import CoalitionStructure
 from code.State import State
+from code.Policy import softmax
 import networkx as nx
 import numpy as np
+from networkx.drawing.nx_pydot import graphviz_layout
+import matplotlib.pyplot as plt
 
 class Game:
     def __init__(self, G0, N, graph, T):
@@ -25,7 +28,10 @@ class Game:
                 node.expand_states(self)
 
     def draw(self):
-        pass
+        plt.rcParams['figure.figsize'] = 30, 10
+        pos =graphviz_layout(self.graph, prog='dot')
+        nx.draw(self.graph, pos,alpha=0.5, node_size=50, arrowsize=5, arrows=True)
+        plt.show()
 
     def add_state(self, new_state):
         if new_state in self.nodes[new_state.t]:
@@ -60,4 +66,9 @@ def init_game(N, T):
     # policy = np array
     for agent in game.N:
         policies[agent] = 0.5 * np.ones(shape=(len(game.policyStates), 2))
+        #policies[agent] = np.random.normal(0, 2, size=(len(game.policyStates), 2))
+        #policies[agent] = softmax(policies[agent])
+
+        # remember to softmax these stuff!
+        #policies[agent] = np.random.normal(loc=0, scale=1, size=(len(game.policyStates), 2))
     return game, policies
