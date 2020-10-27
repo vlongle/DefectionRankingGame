@@ -74,11 +74,12 @@ if __name__ == '__main__':
     #result = np.array(result)
 
 
-    n_samples = 10
+    n_samples = 20
     T = 2
     game, policies = Game.init_game(N, T)
+    print(game.G0.policyStates)
 
-    print_policies(policies, game)
+    #print_policies(policies, game)
     #game.draw()
 
     #Policy.eval_states(game, policies)
@@ -91,10 +92,10 @@ if __name__ == '__main__':
 
     result = AlternatingPolicyOpt.alternating_opt(game, policies, n_samples)
     result = np.array(result)
-    print("result:", result)
-    print("\n\n==== OPT POLICIES! ===")
-    print_policies(policies, game)
-    #plot_progress(N, result)
+    #print("result:", result)
+    #print("\n\n==== OPT POLICIES! ===")
+    #print_policies(policies, game)
+    plot_progress(N, result)
     end = time.time()
     print('take:', end-start)
 

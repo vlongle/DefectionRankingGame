@@ -20,6 +20,7 @@ class Game:
         self.policyStates = []
         self.create_policy_states(self.G0)
         self.valuations = defaultdict(dict)  # key = (leaf) state, value = delta ranking
+        self.build_graph()
 
     def build_graph(self):
         for t in range(self.T):
@@ -60,7 +61,6 @@ def init_game(N, T):
 
     ## build Game
     game = Game(G0, N, graph, T)
-    game.build_graph()
 
     policies = {} # key = player, value = policy
     # policy = np array
