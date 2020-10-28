@@ -28,7 +28,7 @@ class State:
     def __repr__(self):
         return self.name
 
-    def evaluate_leaf(self):
+    def evaluate_leaf(self, ret_delta=True):
         # this function should only be called for the very bottom horizon leaf
         # nodes!
         # for leaf node, return dict {'A': delta_ranking, 'B':...}
@@ -50,7 +50,10 @@ class State:
         ranking_term = get_ranking(abs_weights_term)
         self.value = delta_ranking(ranking_init, ranking_term)
         # e.g. {'C': 1, 'B': -1, 'A': 0}
-        return self.value
+        if ret_delta:
+            return self.value
+        else:
+            return ranking_term
 
     def expand_states(self, game):
         p = powerset(self.F)

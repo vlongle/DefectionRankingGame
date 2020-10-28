@@ -8,13 +8,21 @@ from networkx.drawing.nx_pydot import graphviz_layout
 A = Player.Player('A', 3)
 B = Player.Player('B', 2)
 C = Player.Player('C', 1)
-N = set([A, B])
+N = set([A, B, C])
 
 
 
 
 T = 2
 game, policies = Game.init_game(N, T)
+
+target_agent = C
+n_episodes = 100
+gamma = 0.08
+sExp3 = Bandit.S_exp3(game, policies, target_agent, n_episodes, gamma)
+sExp3.optimize_agent()
+
+
 #pprint(game.policyStates)
 
 #print('>> NO PS???')
@@ -23,20 +31,21 @@ game, policies = Game.init_game(N, T)
 #    print(game_T1.policyStates)
 #    print('====')
 
-nodes_visited = defaultdict(int) # key=nodes, val=number of times visited
+#nodes_visited = defaultdict(int) # key=nodes, val=number of times visited
+#
+#n_episodes = 1000
+#for _ in range(n_episodes):
+#    Gt, PS, choices = MonteCarlo.MC_simulation(game, policies)
+#    for node in Gt:
+#        nodes_visited[node] += 1
 
-n_episodes = 1000
-for _ in range(n_episodes):
-    Gt, PS, choices = MonteCarlo.MC_simulation(game, policies)
-    for node in Gt:
-        nodes_visited[node] += 1
+#colors = [nodes_visited[node] for node in game.graph.nodes()]
 
-colors = [nodes_visited[node] for node in game.graph.nodes()]
 #print(">> visit freq")
 #pprint(nodes_visited)
 
 #game.draw(node_color=colors, cmap=plt.cm.Reds)
-game.fancy_draw(node_color=colors, cmap=plt.cm.Reds)
+#game.fancy_draw(node_color=colors, cmap=plt.cm.Reds)
 
 
 #game.draw()
