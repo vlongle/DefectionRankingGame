@@ -35,7 +35,10 @@ colors = [nodes_visited[node] for node in game.graph.nodes()]
 #print(">> visit freq")
 #pprint(nodes_visited)
 
-game.draw(node_color=colors, cmap=plt.cm.Reds)
+#game.draw(node_color=colors, cmap=plt.cm.Reds)
+game.fancy_draw(node_color=colors, cmap=plt.cm.Reds)
+
+
 #game.draw()
 #pos =graphviz_layout(game.graph, prog='dot')
 #nx.draw(game.graph, pos, node_color=colors, cmap=plt.cm.Reds)
@@ -60,3 +63,33 @@ game.draw(node_color=colors, cmap=plt.cm.Reds)
 #num_episodes = 20
 #for i in range(num_episodes):
 #    print(MonteCarlo.draw_policy_state(G0))
+
+
+
+# https://stackoverflow.com/questions/47380865/json-serialization-error-using-matplotlib-mpld3-with-linkedbrush
+
+
+#import matplotlib.pyplot as plt
+#import numpy as np
+#import mpld3
+#
+#import networkx as nx
+#
+#plt.style.use('fivethirtyeight')
+#
+#G = nx.path_graph(4)
+#pos = nx.spring_layout(G)
+#
+##fig, ax = plt.subplots(subplot_kw=dict(facecolor='#EEEEEE'))
+#fig, ax = plt.subplots()
+#scatter = nx.draw_networkx_nodes(G, pos, ax=ax)
+#nx.draw_networkx_edges(G, pos, ax=ax)
+#
+#labels = G.nodes()
+#tooltip = mpld3.plugins.PointLabelTooltip(scatter, labels=labels)
+#mpld3.plugins.connect(fig, tooltip)
+#plt.axis("off")
+#mpld3.show()
+
+
+

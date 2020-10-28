@@ -5,7 +5,7 @@ from code.State import State
 def draw_policy_state(game_state):
     # draw uniformly random from policyStates
     if not game_state.policyStates:
-        print('{} has no policy states!'.format(game_state))
+        #print('{} has no policy states!'.format(game_state))
         return 'NA' # the free set is empty! ==> no more players left!
     return np.random.choice(game_state.policyStates)
 

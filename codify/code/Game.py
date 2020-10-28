@@ -8,6 +8,8 @@ import networkx as nx
 import numpy as np
 from networkx.drawing.nx_pydot import graphviz_layout
 import matplotlib.pyplot as plt
+import mpld3
+
 
 class Game:
     def __init__(self, G0, N, graph, T):
@@ -32,14 +34,32 @@ class Game:
     def draw(self, **kwargs):
         plt.rcParams['figure.figsize'] = 10, 5
         pos =graphviz_layout(self.graph, prog='dot')
+
         n = nx.draw_networkx_nodes(self.graph, pos, node_size=100, **kwargs)
         nx.draw_networkx_edges(self.graph, pos, alpha=0.2, arrowsize=5, arrows=True)
-        #nx.draw(self.graph, pos, arrows=True, **kwargs)
-        print(kwargs)
         if 'cmap' in kwargs:
             plt.colorbar(n)
         plt.axis("off")
         plt.show()
+
+    def fancy_draw(self, **kwargs):
+        plt.style.use('fivethirtyeight')
+        plt.rcParams['figure.figsize'] = 10, 5
+        pos =graphviz_layout(self.graph, prog='dot')
+
+        fig, ax = plt.subplots()
+        n = nx.draw_networkx_nodes(self.graph, pos, node_size=100, ax=ax, **kwargs)
+        nx.draw_networkx_edges(self.graph, pos, alpha=0.2, arrowsize=5, ax=ax, arrows=True)
+        if 'cmap' in kwargs:
+            plt.colorbar(n)
+
+        # https://stackoverflow.com/questions/33988130/interactive-labels-on-nodes-using-python-and-networkx
+        # Fix Json issue https://stackoverflow.com/questions/47380865/json-serialization-error-using-matplotlib-mpld3-with-linkedbrush
+        # has to go into package __display.py and manually add in a line
+        labels = [n.name for n in self.graph.nodes]
+        tooltip = mpld3.plugins.PointLabelTooltip(n, labels=labels)
+        mpld3.plugins.connect(fig, tooltip)
+        mpld3.show()
 
     def add_state(self, new_state):
         if new_state in self.nodes[new_state.t]:
