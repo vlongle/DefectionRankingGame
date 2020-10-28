@@ -20,6 +20,7 @@ class Game:
         self.policyStates = []
         self.create_policy_states(self.G0)
         self.valuations = defaultdict(dict)  # key = (leaf) state, value = delta ranking
+        self.states_lookup = {} # key = args to State class, value = the actual class
         self.build_graph()
 
     def build_graph(self):
@@ -28,16 +29,23 @@ class Game:
             for node in nodes:
                 node.expand_states(self)
 
-    def draw(self):
-        plt.rcParams['figure.figsize'] = 30, 10
+    def draw(self, **kwargs):
+        plt.rcParams['figure.figsize'] = 10, 5
         pos =graphviz_layout(self.graph, prog='dot')
-        nx.draw(self.graph, pos,alpha=0.5, node_size=50, arrowsize=5, arrows=True)
+        n = nx.draw_networkx_nodes(self.graph, pos, node_size=100, **kwargs)
+        nx.draw_networkx_edges(self.graph, pos, alpha=0.2, arrowsize=5, arrows=True)
+        #nx.draw(self.graph, pos, arrows=True, **kwargs)
+        print(kwargs)
+        if 'cmap' in kwargs:
+            plt.colorbar(n)
+        plt.axis("off")
         plt.show()
 
     def add_state(self, new_state):
         if new_state in self.nodes[new_state.t]:
             return
 
+        self.states_lookup[new_state.name] = new_state
         self.nodes[new_state.t].add(new_state)
         if new_state.t < self.T:
             self.create_policy_states(new_state)

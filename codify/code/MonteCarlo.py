@@ -4,6 +4,9 @@ from code.State import State
 
 def draw_policy_state(game_state):
     # draw uniformly random from policyStates
+    if not game_state.policyStates:
+        print('{} has no policy states!'.format(game_state))
+        return 'NA' # the free set is empty! ==> no more players left!
     return np.random.choice(game_state.policyStates)
 
 
@@ -12,11 +15,11 @@ def agent_act(policy_state, policies):
     action_chosen = {} # key = agent, value = 0/1
     for agent in C:
         # [leave, stay] | action = 0 ==> leave | action = 1 ==> stay
-        action = np.random.choice(range(1), 1, p=policies[agent][policy_state.state_num])[0]
+        action = np.random.choice(range(2), 1, p=policies[agent][policy_state.state_num])[0]
         action_chosen[agent] = action
     return action_chosen
 
-def next_game_state(policy_state, action_chosen):
+def next_game_state(game, policy_state, action_chosen):
     c = policy_state.coalition_considered
     s = policy_state.parentState
 
@@ -34,8 +37,7 @@ def next_game_state(policy_state, action_chosen):
     else:
         CS_new = CoalitionStructure(s.CS.CS, s.CS.Z)  # no plus
     new_state = State(F_new, CS_new, s.t + 1)
-
-    return new_state
+    return game.states_lookup[new_state.name]
 
 def MC_simulation(game, policies):
     '''
@@ -53,9 +55,11 @@ def MC_simulation(game, policies):
     for t in range(game.T):
         cur_game_state = game_states_visited[t]
         PS = draw_policy_state(cur_game_state)
+        if PS == 'NA':
+            break # no more free players. The game effectively terminates!
         action_chosen = agent_act(PS, policies)
 
-        next_state = next_game_state(PS, action_chosen)
+        next_state = next_game_state(game, PS, action_chosen)
 
         policy_states_visited.append(PS)
         game_states_visited.append(next_state)

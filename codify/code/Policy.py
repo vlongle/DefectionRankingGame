@@ -73,7 +73,7 @@ def eval_policy_state(game, policy_state, policies=None):
                 p *= policies[agent][policy_state.state_num, action]
 
         valuations = game.valuations[new_state]
-        #print('valuation:', valuations, 'for outcome', outcome, 'new_state', new_state)
+        print('valuation:', valuations, 'for outcome', outcome, 'new_state', new_state)
         for i, agent in enumerate(game.N):
             #print('doing something?')
             #print('p:', p, 'val:', valuations[agent.name], p * valuations[agent.name])
